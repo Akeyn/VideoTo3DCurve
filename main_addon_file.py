@@ -32,7 +32,7 @@ from bpy.types import (Panel,
                        PropertyGroup,
                        )
 
-logging.config.fileConfig('logging.conf')
+#logging.config.fileConfig('logging.conf')
 
 # ------------------------------------------------------------------------
 #    Scene Properties (custom fields)
@@ -115,7 +115,8 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
 
         os.makedirs(out_folder)
         
-        subprocess.call(['video_to_points.sh', video_file_path, out_folder, 10, 'y'])
+        #os.system("ffmpeg -i {0} -f image2 -vf fps=fps=1 {1}%d.png".format(video_file_path, out_folder_path))
+        os.system("video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, 10, 'y'))
         
         return {'FINISHED'}
 
