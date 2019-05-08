@@ -14,6 +14,8 @@ bl_info = {
 import os
 import bpy
 import shutil
+import logging
+import logging.config
 
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import (StringProperty,
@@ -29,6 +31,8 @@ from bpy.types import (Panel,
                        OperatorFileListElement,
                        PropertyGroup,
                        )
+
+logging.config.fileConfig('logging.conf')
 
 # ------------------------------------------------------------------------
 #    Scene Properties (custom fields)
@@ -102,9 +106,7 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         tmp = '/tmp'
         video_file_path = bpy.context.scene.curve_builder_fields.video_file_path
         video_file_name = os.path.splitext(os.path.basename(bpy.context.scene.curve_builder_fields.video_file_path))[0]
-        sequence_name = 'frame'
         out_folder = os.path.join(tmp, video_file_name)
-        out_folder_path = os.path.join(out_folder, sequence_name)
 
         bpy.context.scene.curve_builder_fields.out_folder_path = out_folder
 
@@ -113,8 +115,8 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
 
         os.makedirs(out_folder)
         
-        os.system("ffmpeg -i {0} -f image2 -vf fps=fps=1 {1}%d.png".format(video_file_path, out_folder_path))
-        # out_folder_path have to include folder "rbg" with images and below "rbg.txt" with timestamp
+        #os.system("ffmpeg -i {0} -f image2 -vf fps=fps=1 {1}%d.png".format(video_file_path, out_folder_path))
+        os.system("video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, 10, 'y'))
         
         return {'FINISHED'}
 
