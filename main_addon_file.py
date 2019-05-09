@@ -182,6 +182,12 @@ class WM_OT_convert_points_to_curve(bpy.types.Operator):
         scene.objects.active = obj  # make the selection effective
         bpy.ops.object.convert(target='CURVE') # convert selected object to curve
 
+        bpy.ops.transform.resize(value=(5, 5, 5), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.curve.spline_type_set(type='NURBS')
+        bpy.ops.object.mode_set(mode='OBJECT')
+
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
