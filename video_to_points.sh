@@ -6,21 +6,25 @@ echo '$2 = ' $2 # outputname
 echo '$3 = ' $3 # fps 10 or 25
 echo '$4 = ' $4 # rotchoice
 
-mkdir -p $2/rgb
+{ # try
+	mkdir -p $2/rgb
 
-if [ $4 = "n" ] || [ $4 = "N" ]
-then
-ffmpeg -i $1 -r $3 -vf scale=-1:320 $2/rgb/img%04d.png
+	if [ $4 = "n" ] || [ $4 = "N" ]
+	then
+	ffmpeg -i $1 -r $3 -vf scale=-1:320 $2/rgb/img%04d.png
 
-elif [ $4 = "y" ] || [ $4 = "Y" ]
-then
-ffmpeg -i $1 -r $3 -vf scale=320:-1,"transpose=1" $2/rgb/img%04d.png
+	elif [ $4 = "y" ] || [ $4 = "Y" ]
+	then
+	ffmpeg -i $1 -r $3 -vf scale=320:-1,"transpose=1" $2/rgb/img%04d.png
 
-else
-    echo "Invalid choice. Choose y/n"
-    echo
-    exit 1
-fi
+	else
+	    echo "Invalid choice. Choose y/n"
+	    echo
+	    exit 1
+	fi
+} || { # catch
+	echo "Error. Processing failed."
+}
 
 #Counts the number of output files
 imgnum=$(ls $2/rgb | wc -l)
