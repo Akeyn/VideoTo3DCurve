@@ -77,13 +77,13 @@ class CurveBuilderFields(PropertyGroup):
 #    Operators (custom functions)
 # ------------------------------------------------------------------------
 
-class WM_OT_save_algorithm(bpy.types.Operator):
-    bl_idname = "wm.save_algorithm"
-    bl_label = "Save Algorithm"
+class WM_OT_build_algorithm(bpy.types.Operator):
+    bl_idname = "wm.build_algorithm"
+    bl_label = "Build Algorithm"
 
     def execute(self, context):
         # TODO add logic to the case of assembly of the selected algorithm
-        os.system("/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/build.sh")
+        os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
 class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
@@ -153,7 +153,33 @@ class WM_OT_convert_points_to_curve(bpy.types.Operator):
     def execute(self, context):
         out_folder = bpy.context.scene.curve_builder_fields.out_folder_path
         key_frame_trajectory = os.path.join(out_folder,'KeyFrameTrajectory.txt')
-        # TODO
+
+        verts = []
+        with open(key_frame_trajectory) as file:
+            for line in file:
+                vector = line.split(' ')[:3]
+                verts.append(vector)
+
+        verts_count = len(verts)
+        edges = []
+        for i in range(verts_count):
+            if i+1 != verts_count:
+                connection = [i, i+1]
+                edges.append(connection)
+
+        faces = []
+
+        mesh_data = bpy.data.meshes.new("trajectory_cam_mesh")
+        mesh_data.from_pydata(verts, edges, faces)
+        mesh_data.update()
+
+        obj = bpy.data.objects.new("Trajectory_Object", mesh_data)
+
+        scene = bpy.context.scene
+        scene.objects.link(obj)
+        obj.select = True
+        # scene.objects.active = obj  # make the selection effective
+
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -173,8 +199,11 @@ class CurveBuilder_CustomPanel(Panel):
         scene = context.scene
         field = scene.curve_builder_fields
 
-        layout.prop(field, "select_algorithm", text="Select Algorithm") 
-        layout.operator("wm.save_algorithm", text='Save Algorithm')
+        algorithm_col = layout.column()
+        algorithm_col.prop(field, "select_algorithm", text="Select Algorithm") 
+        algorithm_col.operator("wm.build_algorithm", text='Build Algorithm')
+        algorithm_col.enabled = False
+
         layout.prop(field, "input_cam_settings", text="Input Cam Settings")
         
         #layout.prop(field, "setting_filepath")
@@ -183,10 +212,17 @@ class CurveBuilder_CustomPanel(Panel):
         #layout.prop(field, "load_cam_settings")
         #layout.prop(field, "save_cam_settings")
 
-        layout.prop(field, "video_file_path", text="Video File Path")
+        video_file_path_col = layout.column()
+        video_file_path_col.prop(field, "video_file_path", text="Video File Path")
+        video_file_path_col.enabled = False
+        
         layout.operator("wm.load_video", text='Load video file')  # set video_file_path
         layout.operator("wm.convert_video", text='Convert Video To Sequence')
-        layout.prop(field, "out_folder_path", text="Out Folder Path")
+
+        debug_col = layout.column()
+        debug_col.prop(field, "out_folder_path", text="Out Folder Path")
+        debug_col.enabled = False
+
         layout.operator("wm.processing_video_sequence", text='Processing Video Sequence')
         layout.operator("wm.convert_points_to_curve", text='Convert Points To Curve')
         #layout.prop(field, "create_cam_path")
@@ -207,4 +243,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
