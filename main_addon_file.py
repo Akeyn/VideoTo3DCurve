@@ -157,7 +157,7 @@ class WM_OT_convert_points_to_curve(bpy.types.Operator):
         verts = []
         with open(key_frame_trajectory) as file:
             for line in file:
-                vector = map(lambda a: float(a), line.split(' ')[1:4]) # 'timestamp (tx ty tz) qx qy qz qw'
+                vector = map(lambda a: float(a), line.split(' ')[1:4])
                 verts.append(vector)
 
         verts_count = len(verts)
@@ -178,7 +178,9 @@ class WM_OT_convert_points_to_curve(bpy.types.Operator):
         scene = bpy.context.scene
         scene.objects.link(obj)
         obj.select = True
-        # scene.objects.active = obj  # make the selection effective
+        
+        scene.objects.active = obj  # make the selection effective
+        bpy.ops.object.convert(target='CURVE') # convert selected object to curve
 
         return {'FINISHED'}
 
