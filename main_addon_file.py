@@ -115,8 +115,10 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
 
         os.makedirs(out_folder)
         
-        #os.system("ffmpeg -i {0} -f image2 -vf fps=fps=1 {1}%d.png".format(video_file_path, out_folder_path))
-        os.system("video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, 10, 'y'))
+        # TODO get current python file path
+        fps = 10  # fps 10 or 25
+        rotchoice = 'n'  # rotation(yes or no)
+        os.system("/home/asterios/Akeyn/VideoTo3DCurve/video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, fps, rotchoice))
         
         return {'FINISHED'}
 
@@ -183,3 +185,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+

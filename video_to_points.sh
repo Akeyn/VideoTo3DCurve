@@ -1,8 +1,11 @@
-$0 # the path to the current file
-$1 # inputname
-$2 # outputname
-$3 # fps 10 or 25
-$4 # rotchoice
+#!/bin/sh
+
+echo '$0 = ' $0 # the path to the current file
+echo '$1 = ' $1 # inputname
+echo '$2 = ' $2 # outputname
+echo '$3 = ' $3 # fps 10 or 25
+echo '$4 = ' $4 # rotchoice
+
 mkdir -p $2/rgb
 
 if [ $4 = "n" ] || [ $4 = "N" ]
