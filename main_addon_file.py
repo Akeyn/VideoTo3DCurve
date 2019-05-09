@@ -40,7 +40,7 @@ from bpy.types import (Panel,
 
 class CurveBuilderFields(PropertyGroup):
 
-    select_algorithm = EnumProperty(
+    slam_algorithm = EnumProperty(
         name="Slam Algorithm",
         description="Apply Algorithm to attribute.",
         items=[ ('OP1', "ORB SLAM", ""),
@@ -52,8 +52,8 @@ class CurveBuilderFields(PropertyGroup):
         set=None
         )
 
-    input_cam_settings = StringProperty(
-        name="Cam Settings",
+    file_path_to_settings = StringProperty(
+        name="File Path To Settings",
         description=":",
         default="",
         maxlen=1024,
@@ -73,6 +73,159 @@ class CurveBuilderFields(PropertyGroup):
         maxlen=1024,
         )
 
+    #--------------------------------------------------------------------------------------------
+    # Camera Parameters. Adjust them!
+    #--------------------------------------------------------------------------------------------
+    # Camera calibration and distortion parameters (OpenCV)
+    camera_fx = FloatProperty(
+        name="Camera.fx",
+        description=":",
+        default=724.6891736,
+        )
+    camera_fy = FloatProperty(
+        name="Camera.fy",
+        description=":",
+        default=726.65674145,
+        )
+
+    camera_cx = FloatProperty(
+        name="Camera.cx",
+        description=":",
+        default=303.71051608,
+        )
+    camera_cy = FloatProperty(
+        name="Camera.cy",
+        description=":",
+        default=204.18022629,
+        )
+
+    camera_k1 = FloatProperty(
+        name="Camera.k1",
+        description=":",
+        default=0.10975062,
+        )
+    camera_k2 = FloatProperty(
+        name="Camera.k2",
+        description=":",
+        default=0.75393683,
+        )
+
+    camera_p1 = FloatProperty(
+        name="Camera.p1",
+        description=":",
+        default=-0.019259,
+        )
+    camera_p2 = FloatProperty(
+        name="Camera.p2",
+        description=":",
+        default=-0.00708093,
+        )
+
+    camera_k3 = FloatProperty(
+        name="Camera.k3",
+        description=":",
+        default=-5.05405739,
+        )
+    # Camera frames per second
+    camera_fps = FloatProperty(
+        name="Camera.fps",
+        description=":",
+        default=20,
+        max=30
+        )
+    # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+    camera_RGB = FloatProperty(
+        name="Camera.RGB",
+        description=":",
+        default=1,
+        max=1
+        )
+    # ORB Extractor: Number of features per image
+    ORBextractor_nFeatures = FloatProperty(
+        name="ORBextractor.nFeatures",
+        description=":",
+        default=1000,
+        )
+    # ORB Extractor: Scale factor between levels in the scale pyramid
+    ORBextractor_scaleFactor = FloatProperty(
+        name="ORBextractor.scaleFactor",
+        description=":",
+        default=1.2,
+        )
+    # ORB Extractor: Number of levels in the scale pyramid
+    ORBextractor_nLevels = FloatProperty(
+        name="ORBextractor.nLevels",
+        description=":",
+        default=8,
+        )
+    # ORB Extractor: Fast threshold
+    # Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+    # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+    # You can lower these values if your images have low contrast
+    ORBextractor_iniThFAST = FloatProperty(
+        name="ORBextractor.iniThFAST",
+        description=":",
+        default=20,
+        )
+    ORBextractor_minThFAST = FloatProperty(
+        name="ORBextractor.minThFAST",
+        description=":",
+        default=7,
+        )
+    #--------------------------------------------------------------------------------------------
+    # Viewer Parameters
+    #--------------------------------------------------------------------------------------------
+    viewer_KeyFrameSize = FloatProperty(
+        name="Viewer.KeyFrameSize",
+        description=":",
+        default=0.05,
+        )
+    viewer_KeyFrameLineWidth = FloatProperty(
+        name="Viewer.KeyFrameLineWidth",
+        description=":",
+        default=1,
+        )
+    viewer_GraphLineWidth = FloatProperty(
+        name="Viewer.GraphLineWidth",
+        description=":",
+        default=0.9,
+        )
+    viewer_PointSize = FloatProperty(
+        name="Viewer.PointSize",
+        description=":",
+        default=2,
+        )
+    viewer_CameraSize = FloatProperty(
+        name="Viewer.CameraSize",
+        description=":",
+        default=0.08,
+        )
+    viewer_CameraLineWidth = FloatProperty(
+        name="Viewer.CameraLineWidth",
+        description=":",
+        default=3,
+        )
+    viewer_ViewpointX = FloatProperty(
+        name="Viewer.ViewpointX",
+        description=":",
+        default=0,
+        )
+    viewer_ViewpointY = FloatProperty(
+        name="Viewer.ViewpointY",
+        description=":",
+        default=-0.7,
+        )
+    viewer_ViewpointZ = FloatProperty(
+        name="Viewer.ViewpointZ",
+        description=":",
+        default=-1.8,
+        )
+    viewer_ViewpointF = FloatProperty(
+        name="Viewer.ViewpointF",
+        description=":",
+        default=500,
+        )
+
 # ------------------------------------------------------------------------
 #    Operators (custom functions)
 # ------------------------------------------------------------------------
@@ -86,9 +239,33 @@ class WM_OT_build_algorithm(bpy.types.Operator):
         os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
+class WM_OT_import_settings(bpy.types.Operator):
+    bl_idname = "wm.import_settings"
+    bl_label = "Import Settings"
+
+    def execute(self, context):
+        # TODO
+        return {'FINISHED'}
+
+class WM_OT_export_settings(bpy.types.Operator):
+    bl_idname = "wm.export_settings"
+    bl_label = "Export Settings"
+
+    def execute(self, context):
+        # TODO
+        return {'FINISHED'}
+
+class WM_OT_apply_settings(bpy.types.Operator):
+    bl_idname = "wm.apply_settings"
+    bl_label = "Apply Settings"
+
+    def execute(self, context):
+        # TODO
+        return {'FINISHED'}
+
 class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
     bl_idname = "wm.load_video"
-    bl_label = "Load video"
+    bl_label = "Load video file"
     files = CollectionProperty(
             name="File Path",
             type=OperatorFileListElement,
@@ -207,32 +384,106 @@ class CurveBuilder_CustomPanel(Panel):
         scene = context.scene
         field = scene.curve_builder_fields
 
+        layout.label("Select Algorithm")
         algorithm_col = layout.column()
-        algorithm_col.prop(field, "select_algorithm", text="Select Algorithm") 
-        algorithm_col.operator("wm.build_algorithm", text='Build Algorithm')
+        algorithm_col.prop(field, "slam_algorithm") 
+        algorithm_col.operator("wm.build_algorithm")
         algorithm_col.enabled = False
+        #---------------------------------------------------------------
+        layout.label("Camera Settings")
 
-        layout.prop(field, "input_cam_settings", text="Input Cam Settings")
+        settings_col = layout.column()
         
-        #layout.prop(field, "setting_filepath")
-        #layout.operator("wm.load_video", text='Load video file')  # set video_file_path
+        settings_row1 = layout.row()
+        settings_row1.prop(field, "camera_fx")
+        settings_row1.prop(field, "camera_fy")
+        
+        settings_row2 = layout.row()
+        settings_row2.prop(field, "camera_cx")
+        settings_row2.prop(field, "camera_cy")
+        
+        settings_row3 = layout.row()
+        settings_row3.prop(field, "camera_k1")
+        settings_row3.prop(field, "camera_k2")
 
-        #layout.prop(field, "load_cam_settings")
-        #layout.prop(field, "save_cam_settings")
+        settings_row4 = layout.row()
+        settings_row4.prop(field, "camera_p1")
+        settings_row4.prop(field, "camera_p2")
 
+        layout.prop(field, "camera_k3")
+        
+        settings_row5 = layout.row()
+        camera_fps_col = settings_row5.column()
+        camera_fps_col.label("Camera frames per second")
+        camera_fps_col.prop(field, "camera_fps")
+        
+        camera_RGB_col = settings_row5.column()
+        camera_RGB_col.label("Color order of the images")
+        camera_RGB_col.prop(field, "camera_RGB")
+
+        ORBextractor_nFeatures_col = settings_row5.column()
+        ORBextractor_nFeatures_col.label("Number of features per image")
+        ORBextractor_nFeatures_col.prop(field, "ORBextractor_nFeatures")
+        
+        settings_row6 = layout.row()
+        ORBextractor_scaleFactor_col = settings_row6.column()
+        ORBextractor_scaleFactor_col.label("Scale factor between levels in the scale pyramid")
+        ORBextractor_scaleFactor_col.prop(field, "ORBextractor_scaleFactor")
+
+        ORBextractor_nLevels_col = settings_row6.column()
+        ORBextractor_nLevels_col.label("Number of levels in the scale pyramid")
+        ORBextractor_nLevels_col.prop(field, "ORBextractor_nLevels")
+        
+        fast_threshold_col = layout.column()
+        fast_threshold_col.label("Fast threshold")
+        settings_row7 = fast_threshold_col.row()
+        settings_row7.prop(field, "ORBextractor_iniThFAST")
+        settings_row7.prop(field, "ORBextractor_minThFAST")
+        
+        viewer_parameters_col = layout.column()
+        viewer_parameters_col.label("Viewer Parameters")
+        settings_row8 = viewer_parameters_col.row()
+        settings_row8.prop(field, "viewer_KeyFrameSize")
+        settings_row8.prop(field, "viewer_KeyFrameLineWidth")
+        
+        settings_row9 = viewer_parameters_col.row()
+        settings_row9.prop(field, "viewer_GraphLineWidth")
+        settings_row9.prop(field, "viewer_PointSize")
+        
+        settings_row10 = viewer_parameters_col.row()
+        settings_row10.prop(field, "viewer_CameraSize")
+        settings_row10.prop(field, "viewer_CameraLineWidth")
+        
+        settings_row11 = viewer_parameters_col.row()
+        settings_row11.prop(field, "viewer_ViewpointX")
+        settings_row11.prop(field, "viewer_ViewpointY")
+        
+        settings_row12 = viewer_parameters_col.row()
+        settings_row12.prop(field, "viewer_ViewpointZ")
+        settings_row12.prop(field, "viewer_ViewpointF")
+
+        input_settings_col = layout.column()
+        input_settings_col.prop(field, "file_path_to_settings")
+        input_settings_col.enabled = False
+
+        settings_action_row = layout.row()
+        settings_action_row.operator("wm.import_settings")
+        settings_action_row.operator("wm.export_settings")
+        settings_action_row.operator("wm.apply_settings")
+        #---------------------------------------------------------------
         video_file_path_col = layout.column()
-        video_file_path_col.prop(field, "video_file_path", text="Video File Path")
+        video_file_path_col.prop(field, "video_file_path")
         video_file_path_col.enabled = False
         
-        layout.operator("wm.load_video", text='Load video file')  # set video_file_path
-        layout.operator("wm.convert_video", text='Convert Video To Sequence')
+        layout.operator("wm.load_video")  # set video_file_path
+        layout.operator("wm.convert_video")
 
         debug_col = layout.column()
-        debug_col.prop(field, "out_folder_path", text="Out Folder Path")
+        debug_col.prop(field, "out_folder_path")
         debug_col.enabled = False
 
-        layout.operator("wm.processing_video_sequence", text='Processing Video Sequence')
-        layout.operator("wm.convert_points_to_curve", text='Convert Points To Curve')
+        layout.operator("wm.processing_video_sequence")
+        layout.operator("wm.convert_points_to_curve")
         #layout.prop(field, "create_cam_path")
         #layout.prop(field, "create_cam_animation")
         layout.separator()
