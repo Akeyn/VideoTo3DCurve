@@ -26,7 +26,7 @@ fi
 imgnum=$(ls $2/rgb | wc -l)
 
 echo "# colour images" > $2/rgb.txt
-echo "#file: '$outputname'" >> $2/rgb.txt
+echo "#file: '$2'" >> $2/rgb.txt
 echo "# timestamp filename" >> $2/rgb.txt
 
 #Uses bc to calculate timestamp increment to 6 places
