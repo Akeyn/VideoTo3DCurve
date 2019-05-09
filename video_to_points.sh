@@ -1,5 +1,3 @@
-#!/bin/sh
-
 echo '$0 = ' $0 # the path to the current file
 echo '$1 = ' $1 # inputname
 echo '$2 = ' $2 # outputname
