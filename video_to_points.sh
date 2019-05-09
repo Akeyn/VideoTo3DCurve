@@ -31,7 +31,7 @@ echo "# timestamp filename" >> $2/rgb.txt
 
 #Uses bc to calculate timestamp increment to 6 places
 #No spaces around =
-frameTime=$(bc <<< "scale=6; 1.0/$fps")
+frameTime=$(bc <<< "scale=6; 1.0/$3")
 timestamp=0.000000
 
 for i in $(seq -f "%04g" $imgnum)
@@ -40,4 +40,6 @@ echo $timestamp rgb/img$i.png >> $2/rgb.txt
 timestamp=$(bc <<< "scale=6; $timestamp+$frameTime")
 done
 
-mv $1 $2
+echo
+echo "Your files are ready, and have all been put in a single folder."
+echo
