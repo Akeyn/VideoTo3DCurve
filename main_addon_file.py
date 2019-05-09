@@ -77,6 +77,15 @@ class CurveBuilderFields(PropertyGroup):
 #    Operators (custom functions)
 # ------------------------------------------------------------------------
 
+class WM_OT_save_algorithm(bpy.types.Operator):
+    bl_idname = "wm.save_algorithm"
+    bl_label = "Save Algorithm"
+
+    def execute(self, context):
+        # TODO add logic to the case of assembly of the selected algorithm
+        os.system("/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/build.sh")
+        return {'FINISHED'}
+
 class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
     bl_idname = "wm.load_video"
     bl_label = "Load video"
@@ -116,7 +125,7 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         os.makedirs(out_folder)
         
         # TODO get current python file path
-        fps = 10  # fps 10 or 25
+        fps = 20  # fps like in the sam.yaml settings (20 or 30)
         rotchoice = 'n'  # rotation(yes or no)
         os.system("/home/asterios/Akeyn/VideoTo3DCurve/video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, fps, rotchoice))
         
@@ -127,13 +136,24 @@ class WM_OT_processing_video_sequence(bpy.types.Operator):
     bl_label = "Processing Video Sequence"
 
     def execute(self, context):
-        mono_rcs = "/home/asterios/orb_slam2_mod/Examples/Monocular/mono_rcs"   # mono_rcs.cc (Save camera trajectory "KeyFrameTrajectory.txt")
-                                                                                # mono_rcs - have to build by bash "/home/asterios/orb_slam2_mod/build.sh" (If it was edit)
+        # TODO /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/ - create method for getting current folder path
+        mono_rcs = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Examples/Monocular/mono_rcs"   # mono_rcs.cc (Save camera trajectory "KeyFrameTrajectory.txt")
+                                                                                # mono_rcs - have to build by bash "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/build.sh" (If it was edit)
         
-        ORBvoc = "/home/asterios/orb_slam2_mod/Vocabulary/ORBvoc.txt"           # refactor set as CONST (vocabulary)
-        sam = "/home/asterios/orb_slam2_mod/Examples/Monocular/sam.yaml"        # refactor set as setting variable (camera settings)
+        ORBvoc = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Vocabulary/ORBvoc.txt"           # refactor set as CONST (vocabulary)
+        sam = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Examples/Monocular/sam.yaml"        # refactor set as setting variable (camera settings)
         out_folder = bpy.context.scene.curve_builder_fields.out_folder_path
         os.system("{0} {1} {2} {3}".format(mono_rcs, ORBvoc, sam, out_folder))
+        return {'FINISHED'}
+
+class WM_OT_convert_points_to_curve(bpy.types.Operator):
+    bl_idname = "wm.convert_points_to_curve"
+    bl_label = "Convert Points To Curve"
+
+    def execute(self, context):
+        out_folder = bpy.context.scene.curve_builder_fields.out_folder_path
+        key_frame_trajectory = os.path.join(out_folder,'KeyFrameTrajectory.txt')
+        # TODO
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -154,6 +174,7 @@ class CurveBuilder_CustomPanel(Panel):
         field = scene.curve_builder_fields
 
         layout.prop(field, "select_algorithm", text="Select Algorithm") 
+        layout.operator("wm.save_algorithm", text='Save Algorithm')
         layout.prop(field, "input_cam_settings", text="Input Cam Settings")
         
         #layout.prop(field, "setting_filepath")
@@ -167,6 +188,7 @@ class CurveBuilder_CustomPanel(Panel):
         layout.operator("wm.convert_video", text='Convert Video To Sequence')
         layout.prop(field, "out_folder_path", text="Out Folder Path")
         layout.operator("wm.processing_video_sequence", text='Processing Video Sequence')
+        layout.operator("wm.convert_points_to_curve", text='Convert Points To Curve')
         #layout.prop(field, "create_cam_path")
         #layout.prop(field, "create_cam_animation")
         layout.separator()
