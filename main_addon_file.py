@@ -385,34 +385,50 @@ class CurveBuilder_CustomPanel(Panel):
         field = scene.curve_builder_fields
 
         layout.label("Select Algorithm")
-        algorithm_col = layout.column()
+
+        algorithm_box = layout.box()
+        algorithm_col = algorithm_box.column()
         algorithm_col.prop(field, "slam_algorithm") 
         algorithm_col.operator("wm.build_algorithm")
         algorithm_col.enabled = False
         #---------------------------------------------------------------
         layout.label("Camera Settings")
 
-        settings_col = layout.column()
+        settings_box = layout.box()
+        settings_col = settings_box.column()
+
+        settings_action_row = settings_col.row()
+        settings_action_row.operator("wm.import_settings")
+        settings_action_row.operator("wm.export_settings")
+        settings_action_row.operator("wm.apply_settings")
         
-        settings_row1 = layout.row()
+        settings_col.separator()        
+        input_settings_col = settings_col.column()
+        input_settings_col.prop(field, "file_path_to_settings")
+        input_settings_col.enabled = False
+
+        settings_col.separator()
+        settings_col = settings_col.column()
+        
+        settings_row1 = settings_col.row()
         settings_row1.prop(field, "camera_fx")
         settings_row1.prop(field, "camera_fy")
         
-        settings_row2 = layout.row()
+        settings_row2 = settings_col.row()
         settings_row2.prop(field, "camera_cx")
         settings_row2.prop(field, "camera_cy")
         
-        settings_row3 = layout.row()
+        settings_row3 = settings_col.row()
         settings_row3.prop(field, "camera_k1")
         settings_row3.prop(field, "camera_k2")
 
-        settings_row4 = layout.row()
+        settings_row4 = settings_col.row()
         settings_row4.prop(field, "camera_p1")
         settings_row4.prop(field, "camera_p2")
 
-        layout.prop(field, "camera_k3")
+        settings_col.prop(field, "camera_k3")
         
-        settings_row5 = layout.row()
+        settings_row5 = settings_col.row()
         camera_fps_col = settings_row5.column()
         camera_fps_col.label("Camera frames per second")
         camera_fps_col.prop(field, "camera_fps")
@@ -425,7 +441,7 @@ class CurveBuilder_CustomPanel(Panel):
         ORBextractor_nFeatures_col.label("Number of features per image")
         ORBextractor_nFeatures_col.prop(field, "ORBextractor_nFeatures")
         
-        settings_row6 = layout.row()
+        settings_row6 = settings_col.row()
         ORBextractor_scaleFactor_col = settings_row6.column()
         ORBextractor_scaleFactor_col.label("Scale factor between levels in the scale pyramid")
         ORBextractor_scaleFactor_col.prop(field, "ORBextractor_scaleFactor")
@@ -434,13 +450,13 @@ class CurveBuilder_CustomPanel(Panel):
         ORBextractor_nLevels_col.label("Number of levels in the scale pyramid")
         ORBextractor_nLevels_col.prop(field, "ORBextractor_nLevels")
         
-        fast_threshold_col = layout.column()
+        fast_threshold_col = settings_col.column()
         fast_threshold_col.label("Fast threshold")
         settings_row7 = fast_threshold_col.row()
         settings_row7.prop(field, "ORBextractor_iniThFAST")
         settings_row7.prop(field, "ORBextractor_minThFAST")
         
-        viewer_parameters_col = layout.column()
+        viewer_parameters_col = settings_col.column()
         viewer_parameters_col.label("Viewer Parameters")
         settings_row8 = viewer_parameters_col.row()
         settings_row8.prop(field, "viewer_KeyFrameSize")
@@ -461,15 +477,6 @@ class CurveBuilder_CustomPanel(Panel):
         settings_row12 = viewer_parameters_col.row()
         settings_row12.prop(field, "viewer_ViewpointZ")
         settings_row12.prop(field, "viewer_ViewpointF")
-
-        input_settings_col = layout.column()
-        input_settings_col.prop(field, "file_path_to_settings")
-        input_settings_col.enabled = False
-
-        settings_action_row = layout.row()
-        settings_action_row.operator("wm.import_settings")
-        settings_action_row.operator("wm.export_settings")
-        settings_action_row.operator("wm.apply_settings")
         #---------------------------------------------------------------
         video_file_path_col = layout.column()
         video_file_path_col.prop(field, "video_file_path")
