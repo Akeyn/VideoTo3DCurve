@@ -302,7 +302,8 @@ class WM_OT_build_algorithm(bpy.types.Operator):
 
     def execute(self, context):
         # TODO add logic to the case of assembly of the selected algorithm
-        os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
+        print(bpy.context.scene.render.filepath)
+        #os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
 class WM_OT_import_settings(bpy.types.Operator):
