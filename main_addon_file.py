@@ -473,7 +473,6 @@ class CurveBuilder_CustomPanel(Panel):
         algorithm_col = algorithm_box.column()
         algorithm_col.prop(field, "slam_algorithm") 
         algorithm_col.operator("wm.build_algorithm", text=bpy.app.translations.pgettext("Build Algorithm"))
-        algorithm_col.enabled = False
         #---------------------------------------------------------------
         layout.label(bpy.app.translations.pgettext("Camera Settings"))
 
