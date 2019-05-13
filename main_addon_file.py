@@ -57,6 +57,7 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default="",
         maxlen=1024,
+        subtype='FILE_PATH',
         )
 
     video_file_path = StringProperty(
@@ -64,13 +65,15 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default="",
         maxlen=1024,
+        subtype='FILE_PATH',
         )
 
     out_folder_path = StringProperty(
         name="Out Folder Path",
         description=":",
-        default="",
+        default="/tmp",
         maxlen=1024,
+        subtype='DIR_PATH',
         )
 
     #--------------------------------------------------------------------------------------------
@@ -263,33 +266,33 @@ class WM_OT_apply_settings(bpy.types.Operator):
         # TODO
         return {'FINISHED'}
 
-class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
-    bl_idname = "wm.load_video"
-    bl_label = "Load video file"
-    files = CollectionProperty(
-            name="File Path",
-            type=OperatorFileListElement,
-            )
-    directory = StringProperty(
-            subtype='DIR_PATH',
-            )
-
-    filename_ext = ""
-
-    def execute(self, context):        
-        directory = self.directory
-        for file_elem in self.files:
-            filepath = os.path.join(directory, file_elem.name)
-
-        bpy.context.scene.curve_builder_fields.video_file_path = filepath
-        return {'FINISHED'}
+#class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
+#    bl_idname = "wm.load_video"
+#    bl_label = "Load video file"
+#    files = CollectionProperty(
+#            name="File Path",
+#            type=OperatorFileListElement,
+#            )
+#    directory = StringProperty(
+#            subtype='DIR_PATH',
+#            )
+#
+#    filename_ext = ""
+#
+#    def execute(self, context):        
+#        directory = self.directory
+#        for file_elem in self.files:
+#            filepath = os.path.join(directory, file_elem.name)
+#
+#        bpy.context.scene.curve_builder_fields.video_file_path = filepath
+#        return {'FINISHED'}
 
 class WM_OT_convert_video_to_sequence(bpy.types.Operator):
     bl_idname = "wm.convert_video"
     bl_label = "Convert Video To Sequence"
 
     def execute(self, context):  # in tmp
-        tmp = '/tmp'
+        tmp = bpy.context.scene.curve_builder_fields.out_folder_path
         video_file_path = bpy.context.scene.curve_builder_fields.video_file_path
         video_file_name = os.path.splitext(os.path.basename(bpy.context.scene.curve_builder_fields.video_file_path))[0]
         out_folder = os.path.join(tmp, video_file_name)
@@ -405,7 +408,6 @@ class CurveBuilder_CustomPanel(Panel):
         settings_col.separator()        
         input_settings_col = settings_col.column()
         input_settings_col.prop(field, "file_path_to_settings")
-        input_settings_col.enabled = False
 
         settings_col.separator()
         settings_col = settings_col.column()
@@ -480,14 +482,13 @@ class CurveBuilder_CustomPanel(Panel):
         #---------------------------------------------------------------
         video_file_path_col = layout.column()
         video_file_path_col.prop(field, "video_file_path")
-        video_file_path_col.enabled = False
+        #video_file_path_col.enabled = False
         
-        layout.operator("wm.load_video")  # set video_file_path
+        #layout.operator("wm.load_video")  # set video_file_path
         layout.operator("wm.convert_video")
 
         debug_col = layout.column()
         debug_col.prop(field, "out_folder_path")
-        debug_col.enabled = False
 
         layout.operator("wm.processing_video_sequence")
         layout.operator("wm.convert_points_to_curve")
