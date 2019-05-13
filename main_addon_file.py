@@ -35,6 +35,69 @@ from bpy.types import (Panel,
 #logging.config.fileConfig('logging.conf')
 
 # ------------------------------------------------------------------------
+#    Localization (custom translations)
+# ------------------------------------------------------------------------
+
+translation_dict = {
+    "en_US" :
+        {
+            ("*", "Slam Algorithm") : "Slam Algorithm",
+            ("*", "Apply Algorithm to attribute.") : "Apply Algorithm to attribute.",
+            ("*", "File Path To Settings") : "File Path To Settings",
+            ("*", "Video File Path") : "Video File Path",
+            ("*", "Output Folder Path") : "Output Folder Path",
+            ("*", "Build Algorithm") : "Build Algorithm",
+            ("*", "Import Settings") : "Import Settings",
+            ("*", "Export Settings") : "Export Settings",
+            ("*", "Apply Settings") : "Apply Settings",
+            ("*", "Convert Video To Sequence") : "Convert Video To Sequence",
+            ("*", "Processing Video Sequence") : "Processing Video Sequence",
+            ("*", "Convert Points To Curve") : "Convert Points To Curve",
+            ("*", "Add Virtual Camera") : "Add Virtual Camera",
+            ("*", "Create Camera Animation") : "Create Camera Animation",
+            ("*", "Curve Builder") : "Curve Builder",
+            ("*", "Motion Capture") : "Motion Capture",
+            ("*", "Select Algorithm") : "Select Algorithm",
+            ("*", "Camera Settings") : "Camera Settings",
+            ("*", "Camera frames per second") : "Camera frames per second",
+            ("*", "Color order of the images") : "Color order of the images",
+            ("*", "Number of features per image") : "Number of features per image",
+            ("*", "Scale factor between levels in the scale pyramid") : "Scale factor between levels in the scale pyramid",
+            ("*", "Number of levels in the scale pyramid") : "Number of levels in the scale pyramid",
+            ("*", "Fast threshold") : "Fast threshold",
+            ("*", "Viewer Parameters") : "Viewer Parameters",
+        },
+    "uk_UA" :
+        {
+            ("*", "Slam Algorithm") : "Slam Алгоритм",
+            ("*", "Apply Algorithm to attribute.") : "Застосувати алгоритм до атрибута.",
+            ("*", "File Path To Settings") : "Шлях до файлу налаштування",
+            ("*", "Video File Path") : "Шлях до відеофайлу",
+            ("*", "Output Folder Path") : "Шлях до папки виводу",
+            ("*", "Build Algorithm") : "Зібрати Алгоритм",
+            ("*", "Import Settings") : "Імпортувати налаштування",
+            ("*", "Export Settings") : "Експортувати налаштування",
+            ("*", "Apply Settings") : "Застосувати  налаштування",
+            ("*", "Convert Video To Sequence") : "Перетворення відео у послідовність",
+            ("*", "Processing Video Sequence") : "Обробка послідовності відео",
+            ("*", "Convert Points To Curve") : "Перетворити точки у криву",
+            ("*", "Add Virtual Camera") : "Додати віртуальну камеру",
+            ("*", "Create Camera Animation") : "Створити анімацію камери",
+            ("*", "Curve Builder") : "Будівельник кривої",
+            ("*", "Motion Capture") : "Захоплення руху",
+            ("*", "Select Algorithm") : "Виберіть Алгоритм",
+            ("*", "Camera Settings") : "Налаштування камери",
+            ("*", "Camera frames per second") : "Кадри камери у секунду",
+            ("*", "Color order of the images") : "Порядок кольорів у зображень",
+            ("*", "Number of features per image") : "Кількість точок на одне зображення",
+            ("*", "Scale factor between levels in the scale pyramid") : "Коефіцієнт масштабування між рівнями у масштабі піраміди",
+            ("*", "Number of levels in the scale pyramid") : "Кількість рівнів у масштабі піраміди",
+            ("*", "Fast threshold") : "Швидкий поріг",
+            ("*", "Viewer Parameters") : "Параметри перегляду",
+        }
+}
+
+# ------------------------------------------------------------------------
 #    Scene Properties (custom fields)
 # ------------------------------------------------------------------------
 
@@ -68,8 +131,8 @@ class CurveBuilderFields(PropertyGroup):
         subtype='FILE_PATH',
         )
 
-    out_folder_path = StringProperty(
-        name="Out Folder Path",
+    output_folder_path = StringProperty(
+        name="Output Folder Path",
         description=":",
         default="/tmp",
         maxlen=1024,
@@ -292,12 +355,12 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
     bl_label = "Convert Video To Sequence"
 
     def execute(self, context):  # in tmp
-        tmp = bpy.context.scene.curve_builder_fields.out_folder_path
+        tmp = bpy.context.scene.curve_builder_fields.output_folder_path
         video_file_path = bpy.context.scene.curve_builder_fields.video_file_path
         video_file_name = os.path.splitext(os.path.basename(bpy.context.scene.curve_builder_fields.video_file_path))[0]
         out_folder = os.path.join(tmp, video_file_name)
 
-        bpy.context.scene.curve_builder_fields.out_folder_path = out_folder
+        bpy.context.scene.curve_builder_fields.output_folder_path = out_folder
 
         if os.path.exists(out_folder):
             shutil.rmtree(out_folder, ignore_errors=True)
@@ -313,7 +376,7 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
 
 class WM_OT_processing_video_sequence(bpy.types.Operator):
     bl_idname = "wm.processing_video_sequence"
-    bl_label = "Processing Video Sequence"
+    bl_label = bpy.app.translations.pgettext("Processing Video Sequence")
 
     def execute(self, context):
         # TODO /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/ - create method for getting current folder path
@@ -322,16 +385,16 @@ class WM_OT_processing_video_sequence(bpy.types.Operator):
         
         ORBvoc = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Vocabulary/ORBvoc.txt"           # refactor set as CONST (vocabulary)
         sam = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Examples/Monocular/sam.yaml"        # refactor set as setting variable (camera settings)
-        out_folder = bpy.context.scene.curve_builder_fields.out_folder_path
+        out_folder = bpy.context.scene.curve_builder_fields.output_folder_path
         os.system("{0} {1} {2} {3}".format(mono_rcs, ORBvoc, sam, out_folder))
         return {'FINISHED'}
 
 class WM_OT_convert_points_to_curve(bpy.types.Operator):
     bl_idname = "wm.convert_points_to_curve"
-    bl_label = "Convert Points To Curve"
+    bl_label = bpy.app.translations.pgettext("Convert Points To Curve")
 
     def execute(self, context):
-        out_folder = bpy.context.scene.curve_builder_fields.out_folder_path
+        out_folder = bpy.context.scene.curve_builder_fields.output_folder_path
         key_frame_trajectory = os.path.join(out_folder,'KeyFrameTrajectory.txt')
 
         verts = []
@@ -370,6 +433,22 @@ class WM_OT_convert_points_to_curve(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class WM_OT_add_virtual_camera(bpy.types.Operator):
+    bl_idname = "wm.add_virtual_camera"
+    bl_label = bpy.app.translations.pgettext("Add Virtual Camera")
+
+    def execute(self, context):
+        # TODO
+        return {'FINISHED'}
+
+class WM_OT_create_camera_animation(bpy.types.Operator):
+    bl_idname = "wm.create_camera_animation"
+    bl_label = bpy.app.translations.pgettext("Create Camera Animation")
+
+    def execute(self, context):
+        # TODO
+        return {'FINISHED'}
+
 # ------------------------------------------------------------------------
 #    Panel in Object Mode (custom groups)
 # ------------------------------------------------------------------------
@@ -378,32 +457,32 @@ class CurveBuilder_CustomPanel(Panel):
     """Curve Builder Script"""
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_label = "Curve Builder"
+    bl_label = bpy.app.translations.pgettext("Curve Builder")
     bl_context = "objectmode"
-    bl_category = "Diplom"
+    bl_category = bpy.app.translations.pgettext("Motion Capture")
     
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         field = scene.curve_builder_fields
 
-        layout.label("Select Algorithm")
+        layout.label(bpy.app.translations.pgettext("Select Algorithm"))
 
         algorithm_box = layout.box()
         algorithm_col = algorithm_box.column()
         algorithm_col.prop(field, "slam_algorithm") 
-        algorithm_col.operator("wm.build_algorithm")
+        algorithm_col.operator("wm.build_algorithm", text=bpy.app.translations.pgettext("Build Algorithm"))
         algorithm_col.enabled = False
         #---------------------------------------------------------------
-        layout.label("Camera Settings")
+        layout.label(bpy.app.translations.pgettext("Camera Settings"))
 
         settings_box = layout.box()
         settings_col = settings_box.column()
 
         settings_action_row = settings_col.row()
-        settings_action_row.operator("wm.import_settings")
-        settings_action_row.operator("wm.export_settings")
-        settings_action_row.operator("wm.apply_settings")
+        settings_action_row.operator("wm.import_settings", text=bpy.app.translations.pgettext("Import Settings"))
+        settings_action_row.operator("wm.export_settings", text=bpy.app.translations.pgettext("Export Settings"))
+        settings_action_row.operator("wm.apply_settings", text=bpy.app.translations.pgettext("Apply Settings"))
         
         settings_col.separator()        
         input_settings_col = settings_col.column()
@@ -432,34 +511,34 @@ class CurveBuilder_CustomPanel(Panel):
         
         settings_row5 = settings_col.row()
         camera_fps_col = settings_row5.column()
-        camera_fps_col.label("Camera frames per second")
+        camera_fps_col.label(bpy.app.translations.pgettext("Camera frames per second"))
         camera_fps_col.prop(field, "camera_fps")
         
         camera_RGB_col = settings_row5.column()
-        camera_RGB_col.label("Color order of the images")
+        camera_RGB_col.label(bpy.app.translations.pgettext("Color order of the images"))
         camera_RGB_col.prop(field, "camera_RGB")
 
         ORBextractor_nFeatures_col = settings_row5.column()
-        ORBextractor_nFeatures_col.label("Number of features per image")
+        ORBextractor_nFeatures_col.label(bpy.app.translations.pgettext("Number of features per image"))
         ORBextractor_nFeatures_col.prop(field, "ORBextractor_nFeatures")
         
         settings_row6 = settings_col.row()
         ORBextractor_scaleFactor_col = settings_row6.column()
-        ORBextractor_scaleFactor_col.label("Scale factor between levels in the scale pyramid")
+        ORBextractor_scaleFactor_col.label(bpy.app.translations.pgettext("Scale factor between levels in the scale pyramid"))
         ORBextractor_scaleFactor_col.prop(field, "ORBextractor_scaleFactor")
 
         ORBextractor_nLevels_col = settings_row6.column()
-        ORBextractor_nLevels_col.label("Number of levels in the scale pyramid")
+        ORBextractor_nLevels_col.label(bpy.app.translations.pgettext("Number of levels in the scale pyramid"))
         ORBextractor_nLevels_col.prop(field, "ORBextractor_nLevels")
         
         fast_threshold_col = settings_col.column()
-        fast_threshold_col.label("Fast threshold")
+        fast_threshold_col.label(bpy.app.translations.pgettext("Fast threshold"))
         settings_row7 = fast_threshold_col.row()
         settings_row7.prop(field, "ORBextractor_iniThFAST")
         settings_row7.prop(field, "ORBextractor_minThFAST")
         
         viewer_parameters_col = settings_col.column()
-        viewer_parameters_col.label("Viewer Parameters")
+        viewer_parameters_col.label(bpy.app.translations.pgettext("Viewer Parameters"))
         settings_row8 = viewer_parameters_col.row()
         settings_row8.prop(field, "viewer_KeyFrameSize")
         settings_row8.prop(field, "viewer_KeyFrameLineWidth")
@@ -485,15 +564,15 @@ class CurveBuilder_CustomPanel(Panel):
         #video_file_path_col.enabled = False
         
         #layout.operator("wm.load_video")  # set video_file_path
-        layout.operator("wm.convert_video")
+        layout.operator("wm.convert_video", text=bpy.app.translations.pgettext("Convert Video To Sequence"))
 
         debug_col = layout.column()
-        debug_col.prop(field, "out_folder_path")
+        debug_col.prop(field, "output_folder_path")
 
-        layout.operator("wm.processing_video_sequence")
-        layout.operator("wm.convert_points_to_curve")
-        #layout.prop(field, "create_cam_path")
-        #layout.prop(field, "create_cam_animation")
+        layout.operator("wm.processing_video_sequence", text=bpy.app.translations.pgettext("Processing Video Sequence"))
+        layout.operator("wm.convert_points_to_curve", text=bpy.app.translations.pgettext("Convert Points To Curve"))
+        layout.operator("wm.add_virtual_camera", text=bpy.app.translations.pgettext("Add Virtual Camera"))
+        layout.operator("wm.create_camera_animation", text=bpy.app.translations.pgettext("Create Camera Animation"))
         layout.separator()
 
 # ------------------------------------------------------------------------
@@ -503,8 +582,10 @@ class CurveBuilder_CustomPanel(Panel):
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.curve_builder_fields = PointerProperty(type=CurveBuilderFields)
+    bpy.app.translations.register(__name__, translation_dict)  # register UA translations
 
 def unregister():
+    bpy.app.translations.unregister(__name__)  # unregister UA translations
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.curve_builder_fields
 
