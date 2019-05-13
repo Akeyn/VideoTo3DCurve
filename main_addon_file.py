@@ -582,7 +582,11 @@ class CurveBuilder_CustomPanel(Panel):
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.curve_builder_fields = PointerProperty(type=CurveBuilderFields)
-    bpy.app.translations.register(__name__, translation_dict)  # register UA translations
+    try:
+        bpy.app.translations.register(__name__, translation_dict)  # register UA translations
+    except:
+        bpy.app.translations.unregister(__name__)
+        bpy.app.translations.register(__name__, translation_dict)
 
 def unregister():
     bpy.app.translations.unregister(__name__)  # unregister UA translations
