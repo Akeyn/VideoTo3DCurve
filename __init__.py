@@ -45,7 +45,6 @@ translation_dict = {
         {
             ("*", "Slam Algorithm") : "Slam Algorithm",
             ("*", "Apply Algorithm to attribute.") : "Apply Algorithm to attribute.",
-            ("*", "File Path To Settings") : "File Path To Settings",
             ("*", "Video File Path") : "Video File Path",
             ("*", "Output Folder Path") : "Output Folder Path",
             ("*", "Build Algorithm") : "Build Algorithm",
@@ -73,7 +72,6 @@ translation_dict = {
         {
             ("*", "Slam Algorithm") : "Slam Алгоритм",
             ("*", "Apply Algorithm to attribute.") : "Застосувати алгоритм до атрибута.",
-            ("*", "File Path To Settings") : "Шлях до файлу налаштування",
             ("*", "Video File Path") : "Шлях до відеофайлу",
             ("*", "Output Folder Path") : "Шлях до папки виводу",
             ("*", "Build Algorithm") : "Зібрати Алгоритм",
@@ -115,14 +113,6 @@ class CurveBuilderFields(PropertyGroup):
         update=None,
         get=None,
         set=None
-        )
-
-    file_path_to_settings = StringProperty(
-        name="File Path To Settings",
-        description=":",
-        default="",
-        maxlen=1024,
-        subtype='FILE_PATH',
         )
 
     video_file_path = StringProperty(
@@ -343,6 +333,7 @@ class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
             data = yaml.safe_load(infile)
 
         print(data)
+        # TODO set the value for each fields on form
 
         return {'FINISHED'}
 
@@ -363,6 +354,7 @@ class WM_OT_export_settings(bpy.types.Operator):
     def execute(self, context):
 
         print("Selected dir: '" + self.directory + "'")
+        # TODO add generate yaml file and exporting
 
         return {'FINISHED'}
 
@@ -384,6 +376,15 @@ class WM_OT_apply_settings(bpy.types.Operator):
         setting_path = os.path.join(slam_folder_path, "Examples/Monocular/sam.yaml")        # refactor set as setting variable (camera settings)
 
         repair_yaml(setting_path)
+
+        with open(setting_path) as f:
+            setting_doc = yaml.load(f)
+
+        setting_doc["Camera.fps"] = bpy.context.scene.curve_builder_fields.camera_fps
+        # TODO add more fields
+
+        with open(setting_path, "w") as f:
+            yaml.dump(setting_doc, f)
 
         return {'FINISHED'}
 
@@ -575,10 +576,6 @@ class CurveBuilder_CustomPanel(Panel):
         settings_action_row.operator("wm.import_settings", text=bpy.app.translations.pgettext("Import Settings"))
         settings_action_row.operator("wm.export_settings", text=bpy.app.translations.pgettext("Export Settings"))
         settings_action_row.operator("wm.apply_settings", text=bpy.app.translations.pgettext("Apply Settings"))
-        
-        settings_col.separator()        
-        input_settings_col = settings_col.column()
-        input_settings_col.prop(field, "file_path_to_settings")
 
         settings_col.separator()
         settings_col = settings_col.column()
