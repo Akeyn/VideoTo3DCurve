@@ -16,6 +16,7 @@ import bpy
 import shutil
 import logging
 import logging.config
+import inspect
 
 from bpy.props import (StringProperty,
                        CollectionProperty,
@@ -45,8 +46,8 @@ class CurveBuilderFields(PropertyGroup):
     slam_algorithm = EnumProperty(
         name="Slam Algorithm",
         description="Apply Algorithm to attribute.",
-        items=[ ('OP1', "ORB SLAM", ""),
-                #('OP2', "LSD SLAM", ""),
+        items=[ ('ORB_SLAM2', "ORB SLAM", ""),
+                #('dir_name', "alg_name", ""),
                ],
         default=None,
         update=None,
@@ -240,12 +241,10 @@ class WM_OT_build_algorithm(bpy.types.Operator):
     bl_label = "Build Algorithm"
 
     def execute(self, context):
+        slam_folder_path = get_slam_folder_path()
         # TODO add logic to the case of assembly of the selected algorithm
-        ORB_SLAM2 = "ORB_SLAM2" 
-
-        bpy.context.scene.curve_builder_fields.file_path_to_settings = os.path.abspath(__file__[1:])  # os.getcwd()
-
-        #os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
+        os.system("cd {0}; ./build.sh".format(slam_folder_path)) 
+		#os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
 class WM_OT_import_settings(bpy.types.Operator):
@@ -310,10 +309,14 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
 
         os.makedirs(out_folder)
         
+        video_to_points = "video_to_points.sh"
+        get_script_folder_path = get_script_folder_path()
+        path_to_bash = os.path.join(get_script_folder_path, video_to_points)
+
         # TODO get current python file path
         fps = 20  # fps like in the sam.yaml settings (20 or 30)
         rotchoice = 'n'  # rotation(yes or no)
-        os.system("/home/asterios/Akeyn/VideoTo3DCurve/video_to_points.sh {0} {1} {2} {3}".format(video_file_path, out_folder, fps, rotchoice))
+        os.system("{0} {1} {2} {3} {4}".format(path_to_bash, video_file_path, out_folder, fps, rotchoice))
         
         return {'FINISHED'}
 
@@ -323,11 +326,14 @@ class WM_OT_processing_video_sequence(bpy.types.Operator):
 
     def execute(self, context):
         # TODO /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/ - create method for getting current folder path
-        mono_rcs = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Examples/Monocular/mono_rcs"   # mono_rcs.cc (Save camera trajectory "KeyFrameTrajectory.txt")
+        slam_folder_path = get_slam_folder_path()
+
+
+        mono_rcs = os.path.join(slam_folder_path, "Examples/Monocular/mono_rcs")   # mono_rcs.cc (Save camera trajectory "KeyFrameTrajectory.txt")
                                                                                 # mono_rcs - have to build by bash "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/build.sh" (If it was edit)
         
-        ORBvoc = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Vocabulary/ORBvoc.txt"           # refactor set as CONST (vocabulary)
-        sam = "/home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2/Examples/Monocular/sam.yaml"        # refactor set as setting variable (camera settings)
+        ORBvoc = os.path.join(slam_folder_path, "Vocabulary/ORBvoc.txt")           # refactor set as CONST (vocabulary)
+        sam = os.path.join(slam_folder_path, "Examples/Monocular/sam.yaml")        # refactor set as setting variable (camera settings)
         out_folder = bpy.context.scene.curve_builder_fields.output_folder_path
         os.system("{0} {1} {2} {3}".format(mono_rcs, ORBvoc, sam, out_folder))
         return {'FINISHED'}
@@ -516,6 +522,24 @@ class CurveBuilder_CustomPanel(Panel):
         layout.operator("wm.add_virtual_camera", text=bpy.app.translations.pgettext("Add Virtual Camera"))
         layout.operator("wm.create_camera_animation", text=bpy.app.translations.pgettext("Create Camera Animation"))
         layout.separator()
+
+# ------------------------------------------------------------------------
+#    Helpers
+# ------------------------------------------------------------------------
+
+def get_script_folder_path():
+    script_filename = inspect.getframeinfo(inspect.currentframe()).filename
+    script_folder_path = os.path.dirname(os.path.abspath(script_filename))
+
+    return script_folder_path
+
+def get_slam_folder_path():
+    get_script_folder_path = get_script_folder_path()
+
+    slam_algorithm = bpy.context.scene.curve_builder_fields.slam_algorithm
+    slam_algorithm_path = os.path.join(get_script_folder_path, slam_algorithm)
+
+    return slam_algorithm_path
 
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
