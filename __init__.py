@@ -334,12 +334,7 @@ class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
         for file_elem in self.files:
             filepath = os.path.join(directory, file_elem.name)
 
-        s = open(filepath).read()
-        s = s.replace(':', ': ')
-        s = s.replace('  ', ' ')
-        f = open(filepath, 'w')
-        f.write(s)
-        f.close()
+        repair_yaml_file(filepath)
 
         skip_lines = 2
         with open(filepath) as infile:
@@ -384,7 +379,12 @@ class WM_OT_apply_settings(bpy.types.Operator):
     bl_label = "Apply Settings"
 
     def execute(self, context):
-        # TODO
+
+        slam_folder_path = get_slam_folder_path()
+        setting_path = os.path.join(slam_folder_path, "Examples/Monocular/sam.yaml")        # refactor set as setting variable (camera settings)
+
+        repair_yaml(setting_path)
+
         return {'FINISHED'}
 
 #class WM_OT_load_video(bpy.types.Operator, ExportHelper):  # Create base class (name = wm.get_filepath)
@@ -684,6 +684,14 @@ def get_slam_folder_path():
     slam_algorithm_path = os.path.join(script_folder_path, slam_algorithm)
 
     return slam_algorithm_path
+
+def repair_yaml_file(filepath):
+    s = open(filepath).read()
+    s = s.replace(':', ': ')
+    s = s.replace('  ', ' ')
+    f = open(filepath, 'w')
+    f.write(s)
+    f.close()
 
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
