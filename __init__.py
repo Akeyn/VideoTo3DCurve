@@ -458,7 +458,13 @@ class WM_OT_add_virtual_camera(bpy.types.Operator):
     bl_label = bpy.app.translations.pgettext("Add Virtual Camera")
 
     def execute(self, context):
-        # TODO
+        bpy.ops.object.camera_add(
+            view_align=True,
+            enter_editmode=False,
+            location=(0, 0, 0),
+            rotation=(0, 0, 0),
+            layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False)
+        )
         return {'FINISHED'}
 
 class WM_OT_create_camera_animation(bpy.types.Operator):
@@ -466,7 +472,24 @@ class WM_OT_create_camera_animation(bpy.types.Operator):
     bl_label = bpy.app.translations.pgettext("Create Camera Animation")
 
     def execute(self, context):
-        # TODO
+        out_folder = bpy.context.scene.curve_builder_fields.output_folder_path
+        key_frame_trajectory = os.path.join(out_folder,'KeyFrameTrajectory.txt')
+
+        obj = bpy.data.objects[bpy.context.object.name]
+        obj.rotation_mode = 'QUATERNION'
+        i = 0
+        with open(key_frame_trajectory) as file:
+            for line in file:
+                vector = list(map(lambda a: float(a), line.split(' ')[1:]))
+                obj.rotation_quaternion = (vector[6] * 5, vector[3] * 5, vector[4] * 5, vector[5] * 5)  # w, x, y, z
+                obj.location = (vector[0] * 5, vector[1] * 5, vector[2] * 5)  # x, y, z
+                bpy.context.scene.frame_current = i
+                bpy.ops.anim.keyframe_insert_menu(type='BUILTIN_KSI_LocRot')
+                i += 1
+
+        bpy.context.scene.frame_current = 0
+
+
         return {'FINISHED'}
 
 # ------------------------------------------------------------------------
