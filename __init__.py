@@ -2,7 +2,7 @@ bl_info = {
     "name": "Curve Builder",
     "description": "Diplom project",
     "author": "Akeyn",
-    "version": (0, 0, 1),
+    "version": (0, 0, 2),
     "blender": (2, 70, 0),
     "location": "3D View > Tools",
     "warning": "",
@@ -17,7 +17,6 @@ import shutil
 import logging
 import logging.config
 
-from bpy_extras.io_utils import ExportHelper
 from bpy.props import (StringProperty,
                        CollectionProperty,
                        BoolProperty,
@@ -26,6 +25,7 @@ from bpy.props import (StringProperty,
                        EnumProperty,
                        PointerProperty,
                        )
+from bpy_extras.io_utils import ExportHelper
 from bpy.types import (Panel,
                        Operator,
                        OperatorFileListElement,
@@ -34,68 +34,7 @@ from bpy.types import (Panel,
 
 #logging.config.fileConfig('logging.conf')
 
-# ------------------------------------------------------------------------
-#    Localization (custom translations)
-# ------------------------------------------------------------------------
-
-translation_dict = {
-    "en_US" :
-        {
-            ("*", "Slam Algorithm") : "Slam Algorithm",
-            ("*", "Apply Algorithm to attribute.") : "Apply Algorithm to attribute.",
-            ("*", "File Path To Settings") : "File Path To Settings",
-            ("*", "Video File Path") : "Video File Path",
-            ("*", "Output Folder Path") : "Output Folder Path",
-            ("*", "Build Algorithm") : "Build Algorithm",
-            ("*", "Import Settings") : "Import Settings",
-            ("*", "Export Settings") : "Export Settings",
-            ("*", "Apply Settings") : "Apply Settings",
-            ("*", "Convert Video To Sequence") : "Convert Video To Sequence",
-            ("*", "Processing Video Sequence") : "Processing Video Sequence",
-            ("*", "Convert Points To Curve") : "Convert Points To Curve",
-            ("*", "Add Virtual Camera") : "Add Virtual Camera",
-            ("*", "Create Camera Animation") : "Create Camera Animation",
-            ("*", "Curve Builder") : "Curve Builder",
-            ("*", "Motion Capture") : "Motion Capture",
-            ("*", "Select Algorithm") : "Select Algorithm",
-            ("*", "Camera Settings") : "Camera Settings",
-            ("*", "Camera frames per second") : "Camera frames per second",
-            ("*", "Color order of the images") : "Color order of the images",
-            ("*", "Number of features per image") : "Number of features per image",
-            ("*", "Scale factor between levels in the scale pyramid") : "Scale factor between levels in the scale pyramid",
-            ("*", "Number of levels in the scale pyramid") : "Number of levels in the scale pyramid",
-            ("*", "Fast threshold") : "Fast threshold",
-            ("*", "Viewer Parameters") : "Viewer Parameters",
-        },
-    "uk_UA" :
-        {
-            ("*", "Slam Algorithm") : "Slam Алгоритм",
-            ("*", "Apply Algorithm to attribute.") : "Застосувати алгоритм до атрибута.",
-            ("*", "File Path To Settings") : "Шлях до файлу налаштування",
-            ("*", "Video File Path") : "Шлях до відеофайлу",
-            ("*", "Output Folder Path") : "Шлях до папки виводу",
-            ("*", "Build Algorithm") : "Зібрати Алгоритм",
-            ("*", "Import Settings") : "Імпортувати налаштування",
-            ("*", "Export Settings") : "Експортувати налаштування",
-            ("*", "Apply Settings") : "Застосувати  налаштування",
-            ("*", "Convert Video To Sequence") : "Перетворення відео у послідовність",
-            ("*", "Processing Video Sequence") : "Обробка послідовності відео",
-            ("*", "Convert Points To Curve") : "Перетворити точки у криву",
-            ("*", "Add Virtual Camera") : "Додати віртуальну камеру",
-            ("*", "Create Camera Animation") : "Створити анімацію камери",
-            ("*", "Curve Builder") : "Будівельник кривої",
-            ("*", "Motion Capture") : "Захоплення руху",
-            ("*", "Select Algorithm") : "Виберіть Алгоритм",
-            ("*", "Camera Settings") : "Налаштування камери",
-            ("*", "Camera frames per second") : "Кадри камери у секунду",
-            ("*", "Color order of the images") : "Порядок кольорів у зображень",
-            ("*", "Number of features per image") : "Кількість точок на одне зображення",
-            ("*", "Scale factor between levels in the scale pyramid") : "Коефіцієнт масштабування між рівнями у масштабі піраміди",
-            ("*", "Number of levels in the scale pyramid") : "Кількість рівнів у масштабі піраміди",
-            ("*", "Fast threshold") : "Швидкий поріг",
-            ("*", "Viewer Parameters") : "Параметри перегляду",
-        }
-}
+from localization import translation_dict
 
 # ------------------------------------------------------------------------
 #    Scene Properties (custom fields)
@@ -302,10 +241,9 @@ class WM_OT_build_algorithm(bpy.types.Operator):
 
     def execute(self, context):
         # TODO add logic to the case of assembly of the selected algorithm
-        ORB_SLAM2 = "ORB_SLAM2"
-        
-        full_path = os.path.dirname(os.path.realpath(__file__[1:]))
-        print(full_path)
+        ORB_SLAM2 = "ORB_SLAM2" 
+
+        bpy.context.scene.curve_builder_fields.file_path_to_settings = os.path.abspath(__file__[1:])  # os.getcwd()
 
         #os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
@@ -596,6 +534,7 @@ def unregister():
     bpy.app.translations.unregister(__name__)  # unregister UA translations
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.curve_builder_fields
+
 
 if __name__ == "__main__":
     register()
