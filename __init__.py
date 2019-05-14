@@ -371,8 +371,8 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         os.makedirs(out_folder)
         
         video_to_points = "video_to_points.sh"
-        get_script_folder_path = get_script_folder_path()
-        path_to_bash = os.path.join(get_script_folder_path, video_to_points)
+        script_folder_path = get_script_folder_path()
+        path_to_bash = os.path.join(script_folder_path, video_to_points)
 
         # TODO get current python file path
         fps = 20  # fps like in the sam.yaml settings (20 or 30)
@@ -595,10 +595,10 @@ def get_script_folder_path():
     return script_folder_path
 
 def get_slam_folder_path():
-    get_script_folder_path = get_script_folder_path()
+    script_folder_path = get_script_folder_path()
 
     slam_algorithm = bpy.context.scene.curve_builder_fields.slam_algorithm
-    slam_algorithm_path = os.path.join(get_script_folder_path, slam_algorithm)
+    slam_algorithm_path = os.path.join(script_folder_path, slam_algorithm)
 
     return slam_algorithm_path
 
