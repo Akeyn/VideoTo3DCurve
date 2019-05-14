@@ -304,7 +304,12 @@ class WM_OT_build_algorithm(bpy.types.Operator):
     def execute(self, context):
         slam_folder_path = get_slam_folder_path()
         # TODO add logic to the case of assembly of the selected algorithm
-        os.system("cd {0}; ./build.sh".format(slam_folder_path)) 
+        bash = 'build.sh'
+
+        path_to_bash = os.path.join(slam_folder_path, bash)
+        os.system("chmod 777 {0}".format(path_to_bash))
+
+        os.system("cd {0}; ./{1}".format(slam_folder_path, bash)) 
 		#os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
