@@ -17,6 +17,7 @@ import shutil
 import logging
 import logging.config
 import inspect
+import yaml
 
 from bpy.props import (StringProperty,
                        CollectionProperty,
@@ -313,12 +314,41 @@ class WM_OT_build_algorithm(bpy.types.Operator):
 		#os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
         return {'FINISHED'}
 
-class WM_OT_import_settings(bpy.types.Operator):
+class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
     bl_idname = "wm.import_settings"
     bl_label = "Import Settings"
 
-    def execute(self, context):
-        # TODO
+
+    files = CollectionProperty(
+            name="File Path",
+            type=OperatorFileListElement,
+            )
+    directory = StringProperty(
+            subtype='DIR_PATH',
+            )
+    
+    filename_ext = ""
+
+    def execute(self, context):        
+        directory = self.directory
+        for file_elem in self.files:
+            filepath = os.path.join(directory, file_elem.name)
+
+        s = open(filepath).read()
+        s = s.replace(':', ': ')
+        s = s.replace('  ', ' ')
+        f = open(filepath, 'w')
+        f.write(s)
+        f.close()
+
+        skip_lines = 2
+        with open(filepath) as infile:
+            for i in range(skip_lines):
+                _ = infile.readline()
+            data = yaml.safe_load(infile)
+
+        print(data)
+
         return {'FINISHED'}
 
 class WM_OT_export_settings(bpy.types.Operator):
