@@ -363,7 +363,8 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         video_file_name = os.path.splitext(os.path.basename(bpy.context.scene.curve_builder_fields.video_file_path))[0]
         out_folder = os.path.join(tmp, video_file_name)
 
-        bpy.context.scene.curve_builder_fields.output_folder_path = out_folder
+        if bpy.context.scene.curve_builder_fields.output_folder_path != out_folder:
+            bpy.context.scene.curve_builder_fields.output_folder_path = out_folder
 
         if os.path.exists(out_folder):
             shutil.rmtree(out_folder, ignore_errors=True)
