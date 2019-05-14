@@ -372,6 +372,8 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         script_folder_path = get_script_folder_path()
         path_to_bash = os.path.join(script_folder_path, video_to_points)
 
+        os.system("chmod 777 {0}".format(path_to_bash))
+
         # TODO get current python file path
         fps = 20  # fps like in the sam.yaml settings (20 or 30)
         rotchoice = 'n'  # rotation(yes or no)
