@@ -370,7 +370,11 @@ class WM_OT_export_settings(bpy.types.Operator, ExportHelper):
             attribute_name = field_names.get(variable_name)
             data[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
 
-        with open(filepath, 'w') as outfile:
+        file = open(filepath, "w")
+        file.write("%YAML 1.0\n")
+        file.close()
+
+        with open(filepath, 'a') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
 
         return {'FINISHED'}
@@ -397,8 +401,12 @@ class WM_OT_apply_settings(bpy.types.Operator):
             attribute_name = field_names.get(variable_name)
             setting_doc[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
 
-        with open(setting_path, "w") as f:
-            yaml.dump(setting_doc, f)
+        file = open(setting_path, "w")
+        file.write("%YAML 1.0\n")
+        file.close()
+
+        with open(setting_path, "a") as outfile:
+            yaml.dump(setting_doc, outfile)
 
         return {'FINISHED'}
 
