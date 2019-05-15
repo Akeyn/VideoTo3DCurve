@@ -18,6 +18,7 @@ import logging
 import logging.config
 import inspect
 import yaml
+import subprocess
 
 from bpy.props import (StringProperty,
                        CollectionProperty,
@@ -300,8 +301,11 @@ class WM_OT_build_algorithm(bpy.types.Operator):
         path_to_bash = os.path.join(slam_folder_path, bash)
         os.system("chmod 777 {0}".format(path_to_bash))
 
-        os.system("cd {0}; ./{1}".format(slam_folder_path, bash)) 
-		#os.system("cd /home/asterios/Akeyn/VideoTo3DCurve/ORB_SLAM2; ./build.sh")
+        query = "cd {0}; ./{1}".format(slam_folder_path, bash)
+
+        proc = subprocess.Popen(query, shell=True)
+        cursor_progress_bar(proc)
+
         return {'FINISHED'}
 
 class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
@@ -440,8 +444,12 @@ class WM_OT_convert_video_to_sequence(bpy.types.Operator):
         # TODO get current python file path
         fps = 20  # fps like in the sam.yaml settings (20 or 30)
         rotchoice = 'n'  # rotation(yes or no)
-        os.system("{0} {1} {2} {3} {4}".format(path_to_bash, video_file_path, out_folder, fps, rotchoice))
+
+        query = "{0} {1} {2} {3} {4}".format(path_to_bash, video_file_path, out_folder, fps, rotchoice)
         
+        proc = subprocess.Popen(query, shell=True)
+        cursor_progress_bar(proc)
+
         return {'FINISHED'}
 
 class WM_OT_processing_video_sequence(bpy.types.Operator):
@@ -459,7 +467,12 @@ class WM_OT_processing_video_sequence(bpy.types.Operator):
         ORBvoc = os.path.join(slam_folder_path, "Vocabulary/ORBvoc.txt")           # refactor set as CONST (vocabulary)
         sam = os.path.join(slam_folder_path, "Examples/Monocular/sam.yaml")        # refactor set as setting variable (camera settings)
         out_folder = bpy.context.scene.curve_builder_fields.output_folder_path
-        os.system("{0} {1} {2} {3}".format(mono_rcs, ORBvoc, sam, out_folder))
+        
+        query = "{0} {1} {2} {3}".format(mono_rcs, ORBvoc, sam, out_folder)
+
+        proc = subprocess.Popen(query, shell=True)
+        cursor_progress_bar(proc)
+
         return {'FINISHED'}
 
 class WM_OT_convert_points_to_curve(bpy.types.Operator):
@@ -755,6 +768,18 @@ def write_settings_file(data, filepath):
 
     with open(filepath, 'a') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
+
+def cursor_progress_bar(proc):
+    wm = bpy.context.window_manager
+
+    i = 0
+    wm.progress_begin(0, 1000)
+    while proc.poll() is None:
+        wm.progress_update(i)
+        i += 1
+
+    wm.progress_end()
+
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
 # ------------------------------------------------------------------------
