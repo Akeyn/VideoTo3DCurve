@@ -185,21 +185,22 @@ class CurveBuilderFields(PropertyGroup):
         default=-5.05405739,
         )
     # Camera frames per second
-    camera_fps = FloatProperty(
+    camera_fps = IntProperty(
         name="Camera.fps",
         description=":",
         default=20,
         max=30
         )
     # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
-    camera_RGB = FloatProperty(
+    camera_RGB = IntProperty(
         name="Camera.RGB",
         description=":",
         default=1,
-        max=1
+        max=1,
+        min=0
         )
     # ORB Extractor: Number of features per image
-    ORBextractor_nFeatures = FloatProperty(
+    ORBextractor_nFeatures = IntProperty(
         name="ORBextractor.nFeatures",
         description=":",
         default=1000,
@@ -211,7 +212,7 @@ class CurveBuilderFields(PropertyGroup):
         default=1.2,
         )
     # ORB Extractor: Number of levels in the scale pyramid
-    ORBextractor_nLevels = FloatProperty(
+    ORBextractor_nLevels = IntProperty(
         name="ORBextractor.nLevels",
         description=":",
         default=8,
@@ -220,12 +221,12 @@ class CurveBuilderFields(PropertyGroup):
     # Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
     # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
     # You can lower these values if your images have low contrast
-    ORBextractor_iniThFAST = FloatProperty(
+    ORBextractor_iniThFAST = IntProperty(
         name="ORBextractor.iniThFAST",
         description=":",
         default=20,
         )
-    ORBextractor_minThFAST = FloatProperty(
+    ORBextractor_minThFAST = IntProperty(
         name="ORBextractor.minThFAST",
         description=":",
         default=7,
@@ -238,7 +239,7 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default=0.05,
         )
-    viewer_KeyFrameLineWidth = FloatProperty(
+    viewer_KeyFrameLineWidth = IntProperty(
         name="Viewer.KeyFrameLineWidth",
         description=":",
         default=1,
@@ -248,7 +249,7 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default=0.9,
         )
-    viewer_PointSize = FloatProperty(
+    viewer_PointSize = IntProperty(
         name="Viewer.PointSize",
         description=":",
         default=2,
@@ -258,7 +259,7 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default=0.08,
         )
-    viewer_CameraLineWidth = FloatProperty(
+    viewer_CameraLineWidth = IntProperty(
         name="Viewer.CameraLineWidth",
         description=":",
         default=3,
@@ -278,7 +279,7 @@ class CurveBuilderFields(PropertyGroup):
         description=":",
         default=-1.8,
         )
-    viewer_ViewpointF = FloatProperty(
+    viewer_ViewpointF = IntProperty(
         name="Viewer.ViewpointF",
         description=":",
         default=500,
@@ -361,21 +362,10 @@ class WM_OT_export_settings(bpy.types.Operator, ExportHelper):
     def execute(self, context):
         directory = self.directory
         for file_elem in self.files:
-            filepath = os.path.join(directory, file_elem.name)
+            setting_path = os.path.join(directory, file_elem.name)
 
-        data = {}
-        field_names = get_field_names()
-
-        for variable_name in field_names:
-            attribute_name = field_names.get(variable_name)
-            data[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
-
-        file = open(filepath, "w")
-        file.write("%YAML 1.0\n")
-        file.close()
-
-        with open(filepath, 'a') as outfile:
-            yaml.dump(data, outfile, default_flow_style=False)
+        setting_doc = {}
+        write_settings_file(setting_doc, setting_path)
 
         return {'FINISHED'}
 
@@ -396,17 +386,7 @@ class WM_OT_apply_settings(bpy.types.Operator):
                 _ = infile.readline()
             setting_doc = yaml.safe_load(infile)
 
-        field_names = get_field_names()
-        for variable_name in field_names:
-            attribute_name = field_names.get(variable_name)
-            setting_doc[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
-
-        file = open(setting_path, "w")
-        file.write("%YAML 1.0\n")
-        file.close()
-
-        with open(setting_path, "a") as outfile:
-            yaml.dump(setting_doc, outfile)
+        write_settings_file(setting_doc, setting_path)
 
         return {'FINISHED'}
 
@@ -733,6 +713,48 @@ def get_field_names():
 
     return fields
 
+def write_settings_file(data, filepath):
+    precision_first = 8
+    precision_second = 2
+
+    precision_first_list = [
+        'Camera.fx',
+        'Camera.fy',
+        'Camera.cx',
+        'Camera.cy',
+        'Camera.k1',
+        'Camera.k2',
+        'Camera.p1',
+        'Camera.p2',
+        'Camera.k3',
+    ]
+    precision_second_list = [
+        'ORBextractor.scaleFactor',
+        'Viewer.KeyFrameSize',
+        'Viewer.GraphLineWidth',
+        'Viewer.CameraSize',
+        'Viewer.ViewpointX',
+        'Viewer.ViewpointY',
+        'Viewer.ViewpointZ',
+    ] 
+
+    field_names = get_field_names()
+    for variable_name in field_names:
+        attribute_name = field_names.get(variable_name)
+
+        value = getattr(bpy.context.scene.curve_builder_fields, variable_name)
+        if attribute_name in precision_first_list:
+            value = round(value, precision_first)
+        elif attribute_name in precision_second_list:
+            value = round(value, precision_second)
+        data[attribute_name] = value
+
+    file = open(filepath, "w")
+    file.write("%YAML 1.0\n")
+    file.close()
+
+    with open(filepath, 'a') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
 # ------------------------------------------------------------------------
