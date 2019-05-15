@@ -330,13 +330,7 @@ class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
 
         repair_yaml_file(filepath)
 
-        skip_lines = 2
-        with open(filepath) as infile:
-            for i in range(skip_lines):
-                _ = infile.readline()
-            data = yaml.safe_load(infile)
-
-        print(data)
+        data = get_settins_from_file(filepath)
 
         field_names = get_field_names()
         for variable_name in field_names:
@@ -384,11 +378,7 @@ class WM_OT_apply_settings(bpy.types.Operator):
 
         repair_yaml_file(setting_path)
 
-        skip_lines = 2
-        with open(setting_path) as infile:
-            for i in range(skip_lines):
-                _ = infile.readline()
-            setting_doc = yaml.safe_load(infile)
+        setting_doc = get_settins_from_file(setting_path)
 
         write_settings_file(setting_doc, setting_path)
 
@@ -779,6 +769,15 @@ def cursor_progress_bar(proc):
         i += 1
 
     wm.progress_end()
+
+def get_settins_from_file(setting_path):
+    skip_lines = 1
+    with open(setting_path) as infile:
+        for i in range(skip_lines):
+            _ = infile.readline()
+        setting_doc = yaml.safe_load(infile)
+
+    return setting_doc
 
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
