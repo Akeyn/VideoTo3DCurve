@@ -294,7 +294,6 @@ class WM_OT_build_algorithm(bpy.types.Operator):
 
     def execute(self, context):
         slam_folder_path = get_slam_folder_path()
-        # TODO add logic to the case of assembly of the selected algorithm
         bash = 'build.sh'
 
         path_to_bash = os.path.join(slam_folder_path, bash)
@@ -333,38 +332,48 @@ class WM_OT_import_settings(bpy.types.Operator, ExportHelper):
             data = yaml.safe_load(infile)
 
         print(data)
-        # TODO set the value for each fields on form
+
+        field_names = get_field_names()
+        for variable_name in field_names:
+            attribute_name = field_names.get(variable_name)
+
+            attribute = data.get(attribute_name)
+            if attribute or attribute == 0:
+                setattr(bpy.context.scene.curve_builder_fields, variable_name, attribute)
 
         return {'FINISHED'}
 
-class WM_OT_export_settings(bpy.types.Operator):
+class WM_OT_export_settings(bpy.types.Operator, ExportHelper):
     bl_idname = "wm.export_settings"
     bl_label = "Export Settings"
 
-    bl_options = {'REGISTER'}
 
-    # Define this to tell 'fileselect_add' that we want a directoy
-    directory = bpy.props.StringProperty(
-        name="Outdir Path",
-        description="Where I will save my stuff"
-        # subtype='DIR_PATH' is not needed to specify the selection mode.
-        # But this will be anyway a directory path.
-        )
+    files = CollectionProperty(
+            name="File Path",
+            type=OperatorFileListElement,
+            )
+    directory = StringProperty(
+            subtype='DIR_PATH',
+            )
+    
+    filename_ext = ""
 
     def execute(self, context):
+        directory = self.directory
+        for file_elem in self.files:
+            filepath = os.path.join(directory, file_elem.name)
 
-        print("Selected dir: '" + self.directory + "'")
-        # TODO add generate yaml file and exporting
+        data = {}
+        field_names = get_field_names()
+
+        for variable_name in field_names:
+            attribute_name = field_names.get(variable_name)
+            data[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
+
+        with open(filepath, 'w') as outfile:
+            yaml.dump(data, outfile, default_flow_style=False)
 
         return {'FINISHED'}
-
-    def invoke(self, context, event):
-        # Open browser, take reference to 'self' read the path to selected
-        # file, put path in predetermined self fields.
-        # See: https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
-        context.window_manager.fileselect_add(self)
-        # Tells Blender to hang on for the slow user input
-        return {'RUNNING_MODAL'}
 
 class WM_OT_apply_settings(bpy.types.Operator):
     bl_idname = "wm.apply_settings"
@@ -375,13 +384,18 @@ class WM_OT_apply_settings(bpy.types.Operator):
         slam_folder_path = get_slam_folder_path()
         setting_path = os.path.join(slam_folder_path, "Examples/Monocular/sam.yaml")        # refactor set as setting variable (camera settings)
 
-        repair_yaml(setting_path)
+        repair_yaml_file(setting_path)
 
-        with open(setting_path) as f:
-            setting_doc = yaml.load(f)
+        skip_lines = 2
+        with open(setting_path) as infile:
+            for i in range(skip_lines):
+                _ = infile.readline()
+            setting_doc = yaml.safe_load(infile)
 
-        setting_doc["Camera.fps"] = bpy.context.scene.curve_builder_fields.camera_fps
-        # TODO add more fields
+        field_names = get_field_names()
+        for variable_name in field_names:
+            attribute_name = field_names.get(variable_name)
+            setting_doc[attribute_name] = getattr(bpy.context.scene.curve_builder_fields, variable_name)
 
         with open(setting_path, "w") as f:
             yaml.dump(setting_doc, f)
@@ -689,6 +703,27 @@ def repair_yaml_file(filepath):
     f = open(filepath, 'w')
     f.write(s)
     f.close()
+
+def get_field_names():
+    class_attributes = CurveBuilderFields.__dict__
+
+    fields = {}
+    for key in class_attributes.keys():
+        value = class_attributes.get(key)
+        if not value:
+            continue
+
+        try:
+            if not value[1]:
+                continue
+
+            name = value[1].get('name')
+            if '.' in name:
+                fields[key] = name
+        except:
+            continue
+
+    return fields
 
 # ------------------------------------------------------------------------
 #    Registration (custom groups)
