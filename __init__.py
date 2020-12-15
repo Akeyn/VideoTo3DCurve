@@ -83,7 +83,7 @@ translation_dict = {
             ("*", "Processing Video Sequence") : "Обробка послідовності відео",
             ("*", "Convert Points To Curve") : "Перетворити точки у криву",
             ("*", "Add Virtual Camera") : "Додати віртуальну камеру",
-            ("*", "Create Camera Animation") : "Створити анімацію камери",
+            ("*", "Create Camera Animation") : "Створити анімацію віртуальної камери",
             ("*", "Curve Builder") : "Будівельник кривої",
             ("*", "Motion Capture") : "Захоплення руху",
             ("*", "Select Algorithm") : "Виберіть Алгоритм",
@@ -537,7 +537,7 @@ class WM_OT_create_camera_animation(bpy.types.Operator):
         with open(key_frame_trajectory) as file:
             for line in file:
                 vector = list(map(lambda a: float(a), line.split(' ')[1:]))
-                obj.rotation_quaternion = (vector[6] * 5, vector[3] * 5, vector[4] * 5, vector[5] * 5)  # w, x, y, z
+                obj.rotation_quaternion = (vector[4] * 5, vector[5] * 5, vector[6] * 5, vector[3] * 5)  # w, x, y, z
                 obj.location = (vector[0] * 5, vector[1] * 5, vector[2] * 5)  # x, y, z
                 bpy.context.scene.frame_current = i
                 bpy.ops.anim.keyframe_insert_menu(type='BUILTIN_KSI_LocRot')
